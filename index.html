@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mote Ops â Status</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d1117;
+      color: #e1e4e8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      padding: 24px 0 16px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #e1e4e8;
+      letter-spacing: -0.3px;
+    }
+    .header .sub {
+      font-size: 12px;
+      color: #8b949e;
+      margin-top: 4px;
+    }
+    .refresh-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      font-size: 11px;
+      color: #484f58;
+    }
+    .refresh-btn {
+      background: #161b22;
+      border: 1px solid #30363d;
+      color: #8b949e;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.15s;
+    }
+    .refresh-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 16px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #58a6ff44; }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .card-title { font-size: 14px; font-weight: 600; color: #e1e4e8; }
+    .card-sub { font-size: 10px; color: #484f58; margin-top: 2px; }
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .badge-live   { background: rgba(63,185,80,.15);  color: #3fb950; }
+    .badge-stale  { background: rgba(210,153,34,.15); color: #d29922; }
+    .badge-error  { background: rgba(248,81,73,.15);  color: #f85149; }
+    .badge-loading{ background: rgba(88,166,255,.1);  color: #58a6ff; }
+    .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .dot-live  { background: #3fb950; animation: pulse 2s infinite; }
+    .dot-stale { background: #d29922; }
+    .dot-error { background: #f85149; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .metric {
+      background: #0d1117;
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .metric-label {
+      font-size: 9px;
+      color: #484f58;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+    .metric-value { font-size: 17px; font-weight: 700; color: #e1e4e8; }
+    .val-green  { color: #3fb950; }
+    .val-yellow { color: #d29922; }
+    .val-red    { color: #f85149; }
+    .val-blue   { color: #58a6ff; }
+    .val-purple { color: #a371f7; }
+    .alert {
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .alert-warn {
+      background: rgba(210,153,34,.1);
+      border: 1px solid rgba(210,153,34,.25);
+      color: #d29922;
+    }
+    .alert-err {
+      background: rgba(248,81,73,.1);
+      border: 1px solid rgba(248,81,73,.25);
+      color: #f85149;
+    }
+    .alert-info {
+      background: rgba(88,166,255,.08);
+      border: 1px solid rgba(88,166,255,.2);
+      color: #58a6ff;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #484f58;
+      padding-top: 8px;
+      border-top: 1px solid #21262d;
+    }
+    .open-link {
+      color: #58a6ff;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .open-link:hover { text-decoration: underline; }
+    .spinner {
+      display: inline-block;
+      width: 9px; height: 9px;
+      border: 2px solid #30363d;
+      border-top-color: #58a6ff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .skeleton {
+      background: linear-gradient(90deg, #161b22 25%, #1c2128 50%, #161b22 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 6px;
+      height: 60px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>â¡ Mote Ops â Status</h1>
+  <div class="sub">Four systems Â· live pulse</div>
+</div>
+
+<div class="refresh-bar">
+  <span id="refresh-ts">Loadingâ¦</span>
+  <button class="refresh-btn" onclick="refreshAll()">â» Refresh</button>
+</div>
+
+<div class="grid" id="grid">
+  <div class="skeleton"></div>
+  <div class="skeleton"></div>
+  <div class="skeleton"></div>
+  <div class="skeleton"></div>
+</div>
+
+<script>
+// âââ helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+function ageLabel(ts) {
+  if (!ts) return null;
+  const ms = Date.now() - new Date(ts).getTime();
+  const m = Math.floor(ms / 60000);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  if (m < 2)  return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  if (h < 24) return `${h}h ${m % 60}m ago`;
+  return `${d}d ${h % 24}h ago`;
+}
+
+function ageStatus(ts) {
+  if (!ts) return 'error';
+  const h = (Date.now() - new Date(ts).getTime()) / 3600000;
+  if (h < 1.5)  return 'live';
+  if (h < 14)   return 'stale';
+  return 'error';
+}
+
+function badge(status, label) {
+  return `<span class="badge badge-${status}">
+    <span class="dot dot-${status}"></span>${label || status}
+  </span>`;
+}
+
+function fmt$(n) {
+  if (n == null) return 'â';
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+async function safeFetch(url) {
+  try {
+    const r = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now());
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+// âââ Kalshi âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+async function loadKalshi() {
+  const [d, hb] = await Promise.all([
+    safeFetch('https://mikedmote52.github.io/kalshi-vercel-deploy/dashboard_data.json'),
+    safeFetch('https://mikedmote52.github.io/kalshi-vercel-deploy/heartbeat.json'),
+  ]);
+  const ts = d?.generated_at || hb?.exported_at || hb?.started_at;
+  const st = ts ? ageStatus(ts) : 'error';
+  const age = ts ? ageLabel(ts) : 'No data';
+  const opps = (d?.opportunities || []).length;
+  const pos  = Array.isArray(d?.positions) ? d.positions.length : (d?.positions ?? 'â');
+
+  let alert = '';
+  if (hb?.started_at && !hb?.exported_at) {
+    alert = `<div class="alert alert-err">â  Pipeline ran but export failed â data stale</div>`;
+  } else if (st === 'error') {
+    alert = `<div class="alert alert-warn">â  Data ${age} â check refresh cron</div>`;
+  } else if (st === 'stale') {
+    alert = `<div class="alert alert-warn">â  Data ${age}</div>`;
+  }
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">â¡ Kalshi</div>
+        <div class="card-sub">Prediction market edge-seeking</div>
+      </div>
+      ${badge(st)}
+    </div>
+    ${alert}
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Balance</div>
+        <div class="metric-value val-blue">${fmt$(d?.balance)}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Open Positions</div>
+        <div class="metric-value">${pos}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Opportunities</div>
+        <div class="metric-value ${opps > 0 ? 'val-green' : ''}">${opps}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Markets Scanned</div>
+        <div class="metric-value">${d?.markets_scanned ?? d?.latest_scan?.markets_pulled ?? 'â'}</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <span>Data: ${age}</span>
+      <a class="open-link" href="https://mikedmote52.github.io/kalshi-vercel-deploy/" target="_blank">Open Dashboard â</a>
+    </div>
+  </div>`;
+}
+
+// âââ Trading Bot ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+async function loadTradingBot() {
+  const d = await safeFetch('https://mikedmote52.github.io/mikes-trading-bot-dashboard/health.json');
+  const ts = d?.timestamp || d?.last_updated || d?.generated_at || d?.as_of;
+  const st = ts ? ageStatus(ts) : (d ? 'stale' : 'error');
+  const age = ts ? ageLabel(ts) : (d ? 'Unknown' : 'No data');
+
+  const equity   = d?.equity ?? d?.total_equity ?? d?.portfolio_value;
+  const pnl      = d?.today_pnl ?? d?.daily_pnl ?? d?.pnl_today;
+  const posCount = d?.open_positions ?? d?.positions ?? d?.position_count;
+  const wr       = d?.win_rate;
+  const wrLabel  = wr != null ? Math.round(wr * (wr <= 1 ? 100 : 1)) + '%' : 'â';
+  const wrClass  = wr != null ? (wr * (wr <= 1 ? 100 : 1) > 50 ? 'val-green' : 'val-yellow') : '';
+
+  const pnlClass = pnl == null ? '' : pnl >= 0 ? 'val-green' : 'val-red';
+  const pnlStr   = pnl == null ? 'â' : (pnl >= 0 ? '+' : '') + fmt$(pnl);
+
+  let alert = '';
+  if (st === 'error') alert = `<div class="alert alert-err">â  Health file ${age} â daemon may be down</div>`;
+  else if (st === 'stale') alert = `<div class="alert alert-warn">â  Data ${age} â daemon offline?</div>`;
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">ð¤ Trading Bot</div>
+        <div class="card-sub">Biotech momentum Â· Alpaca paper</div>
+      </div>
+      ${badge(st)}
+    </div>
+    ${alert}
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Equity</div>
+        <div class="metric-value val-blue">${fmt$(equity)}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Today P&amp;L</div>
+        <div class="metric-value ${pnlClass}">${pnlStr}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Positions</div>
+        <div class="metric-value">${posCount ?? 'â'}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Win Rate</div>
+        <div class="metric-value ${wrClass}">${wrLabel}</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <span>Data: ${age}</span>
+      <a class="open-link" href="https://mikedmote52.github.io/mikes-trading-bot-dashboard/" target="_blank">Open Dashboard â</a>
+    </div>
+  </div>`;
+}
+
+// âââ Stuart House âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+async function loadStuartHouse() {
+  const d = await safeFetch('https://mikedmote52.github.io/stuart-house-dashboard/data.json');
+  const ts = d?.lastUpdated;
+  const st = ts ? ageStatus(ts) : (d ? 'stale' : 'error');
+  const age = ts ? ageLabel(ts) : (d ? 'Unknown' : 'No data');
+
+  const s       = d?.stats || {};
+  const live    = s.live    ?? 'â';
+  const pending = s.pending ?? 'â';
+  const prosp   = s.prospects ?? 'â';
+  const actions = s.actions ?? 'â';
+
+  const actClass = typeof actions === 'number' && actions > 0 ? 'val-yellow' : '';
+  const prospClass = typeof prosp === 'number' && prosp > 0 ? 'val-blue' : '';
+
+  // Top action from actions array
+  const topAction = (d?.actions || [])[0];
+
+  let alert = '';
+  if (typeof actions === 'number' && actions > 0) {
+    alert = `<div class="alert alert-warn">â  ${actions} action${actions > 1 ? 's' : ''} need attention</div>`;
+  } else if (st === 'error') {
+    alert = `<div class="alert alert-err">â  Data ${age} â sweeps may not be running</div>`;
+  }
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">ð  Stuart House</div>
+        <div class="card-sub">${d?.property?.address ?? '2322 Stuart St'} Â· Berkeley rental</div>
+      </div>
+      ${badge(st)}
+    </div>
+    ${alert}
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Live Listings</div>
+        <div class="metric-value ${typeof live === 'number' && live > 0 ? 'val-green' : ''}">${live}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Prospects</div>
+        <div class="metric-value ${prospClass}">${prosp}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Actions Needed</div>
+        <div class="metric-value ${actClass}">${actions}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Pending</div>
+        <div class="metric-value">${pending}</div>
+      </div>
+    </div>
+    ${topAction ? `<div class="alert alert-info" style="margin-top:0;margin-bottom:10px">
+      #1: ${topAction.priority ?? topAction.text ?? ''}
+    </div>` : ''}
+    <div class="card-footer">
+      <span>Data: ${age}</span>
+      <a class="open-link" href="https://mikedmote52.github.io/stuart-house-dashboard/" target="_blank">Open Dashboard â</a>
+    </div>
+  </div>`;
+}
+
+// âââ SideGigBot âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+async function loadSideGigBot() {
+  // No JSON endpoint â check reachability, show last audit snapshot
+  let reachable = false;
+  try {
+    await fetch('https://mikedmote52.github.io/moteops-landing/sidegigbot.html', { mode: 'no-cors' });
+    reachable = true;
+  } catch(e) {}
+
+  const st = reachable ? 'stale' : 'error';
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">ð SideGigBot</div>
+        <div class="card-sub">Opportunity pipeline Â· Mote Ops lead-gen</div>
+      </div>
+      ${badge(st, reachable ? 'up' : 'down')}
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Total Scanned</div>
+        <div class="metric-value">15</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Active Plays</div>
+        <div class="metric-value val-green">2</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">In Testing</div>
+        <div class="metric-value val-blue">3</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Tests Executed</div>
+        <div class="metric-value val-red">0%</div>
+      </div>
+    </div>
+    <div class="alert alert-err">â  Critical: 0% tests executed â execution gap, not pipeline gap</div>
+    <div class="card-footer">
+      <span>Last audit: Apr 8 Â· static snapshot</span>
+      <a class="open-link" href="https://mikedmote52.github.io/moteops-landing/sidegigbot.html" target="_blank">Open Dashboard â</a>
+    </div>
+  </div>`;
+}
+
+// âââ orchestrator âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+async function refreshAll() {
+  document.getElementById('refresh-ts').innerHTML =
+    '<span class="spinner"></span>&nbsp;Refreshingâ¦';
+
+  const [kalshi, bot, stuart, sgb] = await Promise.all([
+    loadKalshi(),
+    loadTradingBot(),
+    loadStuartHouse(),
+    loadSideGigBot(),
+  ]);
+
+  document.getElementById('grid').innerHTML = kalshi + bot + stuart + sgb;
+  document.getElementById('refresh-ts').textContent =
+    'Refreshed ' + new Date().toLocaleTimeString();
+}
+
+refreshAll();
+setInterval(refreshAll, 5 * 60 * 1000); // auto-refresh every 5 min
+</script>
+</body>
+</html>
