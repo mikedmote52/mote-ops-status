@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mote Ops â Status</title>
+  <title>Mote Ops &#8212; Status</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -179,13 +179,13 @@
 <body>
 
 <div class="header">
-  <h1>â¡ Mote Ops â Status</h1>
-  <div class="sub">Four systems Â· live pulse</div>
+  <h1>&#9889; Mote Ops &#8212; Status</h1>
+  <div class="sub">Four systems &#183; live pulse</div>
 </div>
 
 <div class="refresh-bar">
-  <span id="refresh-ts">Loadingâ¦</span>
-  <button class="refresh-btn" onclick="refreshAll()">â» Refresh</button>
+  <span id="refresh-ts">Loading&#8230;</span>
+  <button class="refresh-btn" onclick="refreshAll()">&#8635; Refresh</button>
 </div>
 
 <div class="grid" id="grid">
@@ -196,7 +196,7 @@
 </div>
 
 <script>
-// âââ helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// &#9472;&#9472;&#9472; helpers &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 function ageLabel(ts) {
   if (!ts) return null;
@@ -225,7 +225,7 @@ function badge(status, label) {
 }
 
 function fmt$(n) {
-  if (n == null) return 'â';
+  if (n == null) return '&#8212;';
   return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
@@ -237,7 +237,7 @@ async function safeFetch(url) {
   } catch(e) { return null; }
 }
 
-// âââ Kalshi âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// &#9472;&#9472;&#9472; Kalshi &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function loadKalshi() {
   const [d, hb] = await Promise.all([
@@ -248,22 +248,22 @@ async function loadKalshi() {
   const st = ts ? ageStatus(ts) : 'error';
   const age = ts ? ageLabel(ts) : 'No data';
   const opps = (d?.opportunities || []).length;
-  const pos  = Array.isArray(d?.positions) ? d.positions.length : (d?.positions ?? 'â');
+  const pos  = Array.isArray(d?.positions) ? d.positions.length : (d?.positions ?? '&#8212;');
 
   let alert = '';
   if (hb?.started_at && !hb?.exported_at) {
-    alert = `<div class="alert alert-err">â  Pipeline ran but export failed â data stale</div>`;
+    alert = `<div class="alert alert-err">&#9888; Pipeline ran but export failed &#8212; data stale</div>`;
   } else if (st === 'error') {
-    alert = `<div class="alert alert-warn">â  Data ${age} â check refresh cron</div>`;
+    alert = `<div class="alert alert-warn">&#9888; Data ${age} &#8212; check refresh cron</div>`;
   } else if (st === 'stale') {
-    alert = `<div class="alert alert-warn">â  Data ${age}</div>`;
+    alert = `<div class="alert alert-warn">&#9888; Data ${age}</div>`;
   }
 
   return `
   <div class="card">
     <div class="card-header">
       <div>
-        <div class="card-title">â¡ Kalshi</div>
+        <div class="card-title">&#9889; Kalshi</div>
         <div class="card-sub">Prediction market edge-seeking</div>
       </div>
       ${badge(st)}
@@ -284,17 +284,17 @@ async function loadKalshi() {
       </div>
       <div class="metric">
         <div class="metric-label">Markets Scanned</div>
-        <div class="metric-value">${d?.markets_scanned ?? d?.latest_scan?.markets_pulled ?? 'â'}</div>
+        <div class="metric-value">${d?.markets_scanned ?? d?.latest_scan?.markets_pulled ?? '&#8212;'}</div>
       </div>
     </div>
     <div class="card-footer">
       <span>Data: ${age}</span>
-      <a class="open-link" href="https://mikedmote52.github.io/kalshi-vercel-deploy/" target="_blank">Open Dashboard â</a>
+      <a class="open-link" href="https://mikedmote52.github.io/kalshi-vercel-deploy/" target="_blank">Open Dashboard &#8594;</a>
     </div>
   </div>`;
 }
 
-// âââ Trading Bot ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// &#9472;&#9472;&#9472; Trading Bot &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function loadTradingBot() {
   const d = await safeFetch('https://mikedmote52.github.io/mikes-trading-bot-dashboard/health.json');
@@ -306,22 +306,22 @@ async function loadTradingBot() {
   const pnl      = d?.today_pnl ?? d?.daily_pnl ?? d?.pnl_today;
   const posCount = d?.open_positions ?? d?.positions ?? d?.position_count;
   const wr       = d?.win_rate;
-  const wrLabel  = wr != null ? Math.round(wr * (wr <= 1 ? 100 : 1)) + '%' : 'â';
+  const wrLabel  = wr != null ? Math.round(wr * (wr <= 1 ? 100 : 1)) + '%' : '&#8212;';
   const wrClass  = wr != null ? (wr * (wr <= 1 ? 100 : 1) > 50 ? 'val-green' : 'val-yellow') : '';
 
   const pnlClass = pnl == null ? '' : pnl >= 0 ? 'val-green' : 'val-red';
-  const pnlStr   = pnl == null ? 'â' : (pnl >= 0 ? '+' : '') + fmt$(pnl);
+  const pnlStr   = pnl == null ? '&#8212;' : (pnl >= 0 ? '+' : '') + fmt$(pnl);
 
   let alert = '';
-  if (st === 'error') alert = `<div class="alert alert-err">â  Health file ${age} â daemon may be down</div>`;
-  else if (st === 'stale') alert = `<div class="alert alert-warn">â  Data ${age} â daemon offline?</div>`;
+  if (st === 'error') alert = `<div class="alert alert-err">&#9888; Health file ${age} &#8212; daemon may be down</div>`;
+  else if (st === 'stale') alert = `<div class="alert alert-warn">&#9888; Data ${age} &#8212; daemon offline?</div>`;
 
   return `
   <div class="card">
     <div class="card-header">
       <div>
-        <div class="card-title">ð¤ Trading Bot</div>
-        <div class="card-sub">Biotech momentum Â· Alpaca paper</div>
+        <div class="card-title">&#129302; Trading Bot</div>
+        <div class="card-sub">Biotech momentum &#183; Alpaca paper</div>
       </div>
       ${badge(st)}
     </div>
@@ -337,7 +337,7 @@ async function loadTradingBot() {
       </div>
       <div class="metric">
         <div class="metric-label">Positions</div>
-        <div class="metric-value">${posCount ?? 'â'}</div>
+        <div class="metric-value">${posCount ?? '&#8212;'}</div>
       </div>
       <div class="metric">
         <div class="metric-label">Win Rate</div>
@@ -346,12 +346,12 @@ async function loadTradingBot() {
     </div>
     <div class="card-footer">
       <span>Data: ${age}</span>
-      <a class="open-link" href="https://mikedmote52.github.io/mikes-trading-bot-dashboard/" target="_blank">Open Dashboard â</a>
+      <a class="open-link" href="https://mikedmote52.github.io/mikes-trading-bot-dashboard/" target="_blank">Open Dashboard &#8594;</a>
     </div>
   </div>`;
 }
 
-// âââ Stuart House âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// &#9472;&#9472;&#9472; Stuart House &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function loadStuartHouse() {
   const d = await safeFetch('https://mikedmote52.github.io/stuart-house-dashboard/data.json');
@@ -360,10 +360,10 @@ async function loadStuartHouse() {
   const age = ts ? ageLabel(ts) : (d ? 'Unknown' : 'No data');
 
   const s       = d?.stats || {};
-  const live    = s.live    ?? 'â';
-  const pending = s.pending ?? 'â';
-  const prosp   = s.prospects ?? 'â';
-  const actions = s.actions ?? 'â';
+  const live    = s.live    ?? '&#8212;';
+  const pending = s.pending ?? '&#8212;';
+  const prosp   = s.prospects ?? '&#8212;';
+  const actions = s.actions ?? '&#8212;';
 
   const actClass = typeof actions === 'number' && actions > 0 ? 'val-yellow' : '';
   const prospClass = typeof prosp === 'number' && prosp > 0 ? 'val-blue' : '';
@@ -373,17 +373,17 @@ async function loadStuartHouse() {
 
   let alert = '';
   if (typeof actions === 'number' && actions > 0) {
-    alert = `<div class="alert alert-warn">â  ${actions} action${actions > 1 ? 's' : ''} need attention</div>`;
+    alert = `<div class="alert alert-warn">&#9888; ${actions} action${actions > 1 ? 's' : ''} need attention</div>`;
   } else if (st === 'error') {
-    alert = `<div class="alert alert-err">â  Data ${age} â sweeps may not be running</div>`;
+    alert = `<div class="alert alert-err">&#9888; Data ${age} &#8212; sweeps may not be running</div>`;
   }
 
   return `
   <div class="card">
     <div class="card-header">
       <div>
-        <div class="card-title">ð  Stuart House</div>
-        <div class="card-sub">${d?.property?.address ?? '2322 Stuart St'} Â· Berkeley rental</div>
+        <div class="card-title">&#127968; Stuart House</div>
+        <div class="card-sub">${d?.property?.address ?? '2322 Stuart St'} &#183; Berkeley rental</div>
       </div>
       ${badge(st)}
     </div>
@@ -411,15 +411,15 @@ async function loadStuartHouse() {
     </div>` : ''}
     <div class="card-footer">
       <span>Data: ${age}</span>
-      <a class="open-link" href="https://mikedmote52.github.io/stuart-house-dashboard/" target="_blank">Open Dashboard â</a>
+      <a class="open-link" href="https://mikedmote52.github.io/stuart-house-dashboard/" target="_blank">Open Dashboard &#8594;</a>
     </div>
   </div>`;
 }
 
-// âââ SideGigBot âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// &#9472;&#9472;&#9472; SideGigBot &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function loadSideGigBot() {
-  // No JSON endpoint â check reachability, show last audit snapshot
+  // No JSON endpoint -- check reachability, show last audit snapshot
   let reachable = false;
   try {
     await fetch('https://mikedmote52.github.io/moteops-landing/sidegigbot.html', { mode: 'no-cors' });
@@ -432,8 +432,8 @@ async function loadSideGigBot() {
   <div class="card">
     <div class="card-header">
       <div>
-        <div class="card-title">ð SideGigBot</div>
-        <div class="card-sub">Opportunity pipeline Â· Mote Ops lead-gen</div>
+        <div class="card-title">&#128640; SideGigBot</div>
+        <div class="card-sub">Opportunity pipeline &#183; Mote Ops lead-gen</div>
       </div>
       ${badge(st, reachable ? 'up' : 'down')}
     </div>
@@ -455,19 +455,19 @@ async function loadSideGigBot() {
         <div class="metric-value val-red">0%</div>
       </div>
     </div>
-    <div class="alert alert-err">â  Critical: 0% tests executed â execution gap, not pipeline gap</div>
+    <div class="alert alert-err">&#9888; Critical: 0% tests executed &#8212; execution gap, not pipeline gap</div>
     <div class="card-footer">
-      <span>Last audit: Apr 8 Â· static snapshot</span>
-      <a class="open-link" href="https://mikedmote52.github.io/moteops-landing/sidegigbot.html" target="_blank">Open Dashboard â</a>
+      <span>Last audit: Apr 8 &#183; static snapshot</span>
+      <a class="open-link" href="https://mikedmote52.github.io/moteops-landing/sidegigbot.html" target="_blank">Open Dashboard &#8594;</a>
     </div>
   </div>`;
 }
 
-// âââ orchestrator âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// &#9472;&#9472;&#9472; orchestrator &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function refreshAll() {
   document.getElementById('refresh-ts').innerHTML =
-    '<span class="spinner"></span>&nbsp;Refreshingâ¦';
+    '<span class="spinner"></span>&nbsp;Refreshing&#8230;';
 
   const [kalshi, bot, stuart, sgb] = await Promise.all([
     loadKalshi(),
