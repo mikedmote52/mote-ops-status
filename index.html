@@ -196,125 +196,43 @@
 </div>
 
 <script>
-// &#9472;&#9472;&#9472; helpers &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
-
-function ageLabel(ts) {
-  if (!ts) return null;
-  const ms = Date.now() - new Date(ts).getTime();
-  const m = Math.floor(ms / 60000);
-  const h = Math.floor(m / 60);
-  const d = Math.floor(h / 24);
-  if (m < 2)  return 'Just now';
-  if (m < 60) return `${m}m ago`;
-  if (h < 24) return `${h}h ${m % 60}m ago`;
-  return `${d}d ${h % 24}h ago`;
-}
-
-function ageStatus(ts) {
-  if (!ts) return 'error';
-  const h = (Date.now() - new Date(ts).getTime()) / 3600000;
-  if (h < 1.5)  return 'live';
-  if (h < 14)   return 'stale';
-  return 'error';
-}
-
-function badge(status, label) {
-  return `<span class="badge badge-${status}">
-    <span class="dot dot-${status}"></span>${label || status}
-  </span>`;
-}
-
-function fmt$(n) {
-  if (n == null) return '&#8212;';
-  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-async function safeFetch(url) {
-  try {
-    const r = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now());
-    if (!r.ok) return null;
-    return await r.json();
-  } catch(e) { return null; }
-}
-
-// &#9472;&#9472;&#9472; Kalshi &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
-
-async function loadKalshi() {
-  const [d, hb] = await Promise.all([
-    safeFetch('https://mikedmote52.github.io/kalshi-vercel-deploy/dashboard_data.json'),
-    safeFetch('https://mikedmote52.github.io/kalshi-vercel-deploy/heartbeat.json'),
-  ]);
-  const ts = d?.generated_at || hb?.exported_at || hb?.started_at;
-  const st = ts ? ageStatus(ts) : 'error';
-  const age = ts ? ageLabel(ts) : 'No data';
-  const opps = (d?.opportunities || []).length;
-  const pos  = Array.isArray(d?.positions) ? d.positions.length : (d?.positions ?? '&#8212;');
-
-  let alert = '';
-  if (hb?.started_at && !hb?.exported_at) {
-    alert = `<div class="alert alert-err">&#9888; Pipeline ran but export failed &#8212; data stale</div>`;
-  } else if (st === 'error') {
-    alert = `<div class="alert alert-warn">&#9888; Data ${age} &#8212; check refresh cron</div>`;
-  } else if (st === 'stale') {
-    alert = `<div class="alert alert-warn">&#9888; Data ${age}</div>`;
-  }
-
-  return `
-  <div class="card">
-    <div class="card-header">
-      <div>
-        <div class="card-title">&#9889; Kalshi</div>
-        <div class="card-sub">Prediction market edge-seeking</div>
-      </div>
-      ${badge(st)}
-    </div>
-    ${alert}
-    <div class="metrics">
-      <div class="metric">
-        <div class="metric-label">Balance</div>
-        <div class="metric-value val-blue">${fmt$(d?.balance)}</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Open Positions</div>
-        <div class="metric-value">${pos}</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Opportunities</div>
-        <div class="metric-value ${opps > 0 ? 'val-green' : ''}">${opps}</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Markets Scanned</div>
-        <div class="metric-value">${d?.markets_scanned ?? d?.latest_scan?.markets_pulled ?? '&#8212;'}</div>
-      </div>
-    </div>
-    <div class="card-footer">
-      <span>Data: ${age}</span>
-      <a class="open-link" href="https://mikedmote52.github.io/kalshi-vercel-deploy/" target="_blank">Open Dashboard &#8594;</a>
-    </div>
-  </div>`;
-}
-
-// &#9472;&#9472;&#9472; Trading Bot &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+// &#9472;&#9472;&#9472; helpers &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function loadTradingBot() {
-  const d = await safeFetch('https://mikedmote52.github.io/mikes-trading-bot-dashboard/health.json');
-  const ts = d?.timestamp || d?.last_updated || d?.generated_at || d?.as_of;
-  const st = ts ? ageStatus(ts) : (d ? 'stale' : 'error');
+  const d = await safeFetch('https://mikedmote52.github.io/mikes-trading-bot-dashboard/data/health.json');
+  const ts = d?.timestamp || d?.last_updated || d?.generated_at;
+  const s  = d?.stats || {};
+
+  // Bot runs during market hours &#8212; stale threshold is 26h, not 14h
+  function botAgeStatus(ts) {
+    if (!ts) return 'error';
+    const h = (Date.now() - new Date(ts).getTime()) / 3600000;
+    if (h < 2)  return 'live';
+    if (h < 26) return 'stale';
+    return 'error';
+  }
+
+  const st  = ts ? botAgeStatus(ts) : (d ? 'stale' : 'error');
   const age = ts ? ageLabel(ts) : (d ? 'Unknown' : 'No data');
 
-  const equity   = d?.equity ?? d?.total_equity ?? d?.portfolio_value;
-  const pnl      = d?.today_pnl ?? d?.daily_pnl ?? d?.pnl_today;
-  const posCount = d?.open_positions ?? d?.positions ?? d?.position_count;
-  const wr       = d?.win_rate;
-  const wrLabel  = wr != null ? Math.round(wr * (wr <= 1 ? 100 : 1)) + '%' : '&#8212;';
-  const wrClass  = wr != null ? (wr * (wr <= 1 ? 100 : 1) > 50 ? 'val-green' : 'val-yellow') : '';
+  const equity   = s.equity ?? s.total_equity;
+  const pnl      = s.total_pnl;
+  const posCount = s.num_positions ?? s.open_positions;
+  const wr       = s.win_rate;
+  const wrLabel  = wr != null ? Math.round(wr) + '%' : '&#8212;';
+  const wrClass  = wr != null ? (wr > 50 ? 'val-green' : 'val-yellow') : '';
 
   const pnlClass = pnl == null ? '' : pnl >= 0 ? 'val-green' : 'val-red';
   const pnlStr   = pnl == null ? '&#8212;' : (pnl >= 0 ? '+' : '') + fmt$(pnl);
 
+  const winners = (s.big_winners || s.trailing || []).slice(0, 2);
+
   let alert = '';
-  if (st === 'error') alert = `<div class="alert alert-err">&#9888; Health file ${age} &#8212; daemon may be down</div>`;
-  else if (st === 'stale') alert = `<div class="alert alert-warn">&#9888; Data ${age} &#8212; daemon offline?</div>`;
+  if (st === 'error') {
+    alert = `<div class="alert alert-err">&#9888; Health file ${age} &#8212; daemon may be down</div>`;
+  } else if (winners.length > 0) {
+    alert = `<div class="alert alert-info">&#8593; Top: ${winners.join(' &#183; ')}</div>`;
+  }
 
   return `
   <div class="card">
@@ -332,7 +250,7 @@ async function loadTradingBot() {
         <div class="metric-value val-blue">${fmt$(equity)}</div>
       </div>
       <div class="metric">
-        <div class="metric-label">Today P&amp;L</div>
+        <div class="metric-label">Total P&amp;L</div>
         <div class="metric-value ${pnlClass}">${pnlStr}</div>
       </div>
       <div class="metric">
@@ -351,7 +269,7 @@ async function loadTradingBot() {
   </div>`;
 }
 
-// &#9472;&#9472;&#9472; Stuart House &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+// &#9472;&#9472;&#9472; Stuart House &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function loadStuartHouse() {
   const d = await safeFetch('https://mikedmote52.github.io/stuart-house-dashboard/data.json');
@@ -368,11 +286,21 @@ async function loadStuartHouse() {
   const actClass = typeof actions === 'number' && actions > 0 ? 'val-yellow' : '';
   const prospClass = typeof prosp === 'number' && prosp > 0 ? 'val-blue' : '';
 
+  // Room status from property data
+  const rooms = d?.property?.rooms || [];
+  const roomA = rooms.find(r => r.name && r.name.includes('A'));
+  const roomB = rooms.find(r => r.name && r.name.includes('B'));
+
+  // Find if any prospect has signed a lease
+  const leaseSigned = (d?.prospects || []).find(p => p.status && p.status.includes('LEASE SIGNED'));
+
   // Top action from actions array
   const topAction = (d?.actions || [])[0];
 
   let alert = '';
-  if (typeof actions === 'number' && actions > 0) {
+  if (leaseSigned) {
+    alert = `<div class="alert alert-info">&#10003; Room A leased &#8212; ${leaseSigned.name} &#183; Aug 1 &#183; Room B still open</div>`;
+  } else if (typeof actions === 'number' && actions > 0) {
     alert = `<div class="alert alert-warn">&#9888; ${actions} action${actions > 1 ? 's' : ''} need attention</div>`;
   } else if (st === 'error') {
     alert = `<div class="alert alert-err">&#9888; Data ${age} &#8212; sweeps may not be running</div>`;
@@ -406,7 +334,7 @@ async function loadStuartHouse() {
         <div class="metric-value">${pending}</div>
       </div>
     </div>
-    ${topAction ? `<div class="alert alert-info" style="margin-top:0;margin-bottom:10px">
+    ${topAction && !leaseSigned ? `<div class="alert alert-info" style="margin-top:0;margin-bottom:10px">
       #1: ${topAction.priority ?? topAction.text ?? ''}
     </div>` : ''}
     <div class="card-footer">
@@ -419,7 +347,7 @@ async function loadStuartHouse() {
 // &#9472;&#9472;&#9472; SideGigBot &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
 
 async function loadSideGigBot() {
-  // No JSON endpoint -- check reachability, show last audit snapshot
+  // No JSON endpoint &#8212; check reachability, show last audit snapshot
   let reachable = false;
   try {
     await fetch('https://mikedmote52.github.io/moteops-landing/sidegigbot.html', { mode: 'no-cors' });
